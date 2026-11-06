@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.package-stage/
+runtime/
+__pycache__/
+*.pyc
+*.nairef
+.DS_Store
+Thumbs.db
+release/

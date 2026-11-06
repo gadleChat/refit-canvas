@@ -1,0 +1,20 @@
+{
+  "repository": "https://github.com/Dd154663/SDStudio",
+  "based_on": "https://github.com/sunho/SDStudio",
+  "commit": "45728589b9ffcb50dde5b8491c237afa2aae30fb",
+  "files": {
+    "src/renderer/backends/genVendors/nai.ts": "3aa19154489e6d64414b1375fd0b0cab6e2adf0155276d0f3f491f41de6cc990",
+    "src/renderer/backends/genVendors/naiModelCapabilities.ts": "625c3f53a04b2315120a864970838cc50a932d22c49b81769bac03f611a57060",
+    "src/renderer/backends/genVendors/naiQualityPresets.ts": "2039e28bda1183d258cb2005398310e892f41f7d7f3820f637929762b5e3c7e6",
+    "src/renderer/backends/genVendors/naiUpscale.ts": "3972ee2566e494f5fe04ec4dfafd1cf2cf38f93be91a6d57ef52a853c037c40d",
+    "src/renderer/backends/imageGen.ts": "c9791493924d15b0517e2fd8fd3ad44a24af71a1761276ddbd7802924a29b58d",
+    "src/renderer/backends/generationSettings.ts": "da45c34901d7c949492bc2d564e7420820a37590acc9eb30a36dbc382408e342",
+    "src/renderer/models/requestTiming.ts": "2cad7b1971365100e8b7edabc378c148218873bc5d3d2fa12581db2413779c2c",
+    "src/renderer/models/promptWeightSpacing.ts": "88635c7ed696896596fab6f2417c2aec69eaf6dbea4e782a6744f3198857600a",
+    "src/renderer/models/promptWeightSyntax.ts": "40510d7f60dbc2c7a668decd852cc6f570c732345c04e02b435f033a71204ea3",
+    "src/renderer/componenets/BrushTool.tsx": "8b86154373f4a02193d8c30743705ab9b20df4bc8aee6f835f7ff058f1c8f17c",
+    "LICENSE": "c1157df8e45e400b2e4822c31decaddb3edee5aba03141adbedf47c768c719b0",
+    "package.json": "b2dc9c2bca378020359379f36553ecf099a46dde51611d431dc6a288aaa346dc",
+    "src/renderer/models/focusedInpaint.ts": "dc648c015a727f74b59d255da2875fded369539907e0654c083dc43ace62ec64"
+  }
+}

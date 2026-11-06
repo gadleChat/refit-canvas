@@ -1,0 +1,16 @@
+{
+  "name": "refit-canvas-core",
+  "private": true,
+  "version": "1.6.1",
+  "scripts": {
+    "build": "node build.cjs",
+    "test:mask": "node --test ../tests/mask-grid.test.cjs"
+  },
+  "dependencies": {
+    "buffer": "6.0.3",
+    "jszip": "3.10.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
+}

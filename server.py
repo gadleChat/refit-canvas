@@ -121,7 +121,7 @@ def main():
             finally:server.shutdown()
         threading.Thread(target=watch_parent,daemon=True).start()
         print(json.dumps({'event':'ready','url':url}),flush=True)
-    else:print('Refit Canvas 1.6.2\n'+url+'\nKeep this window open. Ctrl+C to stop.',flush=True)
+    else:print('Refit Canvas 1.6.3\n'+url+'\nKeep this window open. Ctrl+C to stop.',flush=True)
     if not args.no_browser and not args.desktop:threading.Timer(.6,lambda:webbrowser.open(url)).start()
     try:server.serve_forever()
     except KeyboardInterrupt:pass

@@ -17,7 +17,7 @@ def png(data):
     return w,h
 
 def perform(path,token,wire=None):
-    req=urllib.request.Request(HOST+path,data=wire,headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/zip' if wire is not None else 'application/json','User-Agent':'Refit-Canvas/1.6.2'})
+    req=urllib.request.Request(HOST+path,data=wire,headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/zip' if wire is not None else 'application/json','User-Agent':'Refit-Canvas/1.6.3'})
     try:
         with urllib.request.urlopen(req,timeout=300 if wire is not None else 30) as r:return r.read(70*1024*1024)
     except urllib.error.HTTPError as e:

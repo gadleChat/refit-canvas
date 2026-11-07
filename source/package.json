@@ -1,7 +1,7 @@
 {
   "name": "refit-canvas-core",
   "private": true,
-  "version": "1.6.2",
+  "version": "1.6.3",
   "scripts": {
     "build": "node build.cjs",
     "test:mask": "node --test ../tests/mask-grid.test.cjs"

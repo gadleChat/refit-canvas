@@ -36,6 +36,11 @@ const imgIds=new WeakMap();let imgSeq=0;
 function imgId(o){if(!o)return 0;let v=imgIds.get(o);if(!v){v=++imgSeq;imgIds.set(o,v);}return v;}
 function cachedBase(){const k=S.w+'x'+S.h+'|'+S.layers.map(l=>imgId(l.img)+':'+l.x+','+l.y+','+l.w+','+l.h).join('|');if(VIEW.baseKey!==k||!VIEW.base){VIEW.base=renderBase();VIEW.baseKey=k;}return VIEW.base;}
 const MASK_TINT='#f74e9e';
+// Cells of a finished stroke are cached per stroke (WeakMap, so nothing leaks into saved projects).
+const strokeCellCache=new WeakMap();
+function strokeCells(saved,s){if(s.fill)return null;const m=main(),k=S.w+'x'+S.h+'|'+(saved.space==='canvas'?'':m?[m.x,m.y,m.w,m.h].join(','):'-')+'|'+s.points.length+'|'+s.size+'|'+s.shape;const hit=strokeCellCache.get(saved);if(hit&&hit.k===k)return hit.cells;const cells=SDStudioCore.strokeChunks(s.points,s.size,s.shape,S.w,S.h);strokeCellCache.set(saved,{k,cells});return cells;}
+function importedMaskTint(){const k=imgId(S.maskBase)+'|'+S.w+'x'+S.h;if(VIEW.baseMaskKey!==k){const c=elCanvas(S.w,S.h),g=c.getContext('2d');g.drawImage(S.maskBase,0,0);g.putImageData(SDStudioCore.normalizeMaskData(g.getImageData(0,0,S.w,S.h),S.w,S.h,true),0,0);g.globalCompositeOperation='source-in';g.fillStyle=MASK_TINT;g.fillRect(0,0,S.w,S.h);VIEW.baseMaskTint=c;VIEW.baseMaskKey=k;}return VIEW.baseMaskTint;}
+function rebuildMaskOverlay(){const c=elCanvas(S.w,S.h),g=c.getContext('2d');if(S.maskBase)g.drawImage(importedMaskTint(),0,0);for(const saved of S.strokes){const s=toCanvasStroke(saved,main());if(!s)continue;const cells=strokeCells(saved,s);if(cells){g.globalCompositeOperation=s.erase?'destination-out':'source-over';g.fillStyle=MASK_TINT;for(const q of cells)g.fillRect(q.chunkX*8,q.chunkY*8,8,8);g.globalCompositeOperation='source-over';}else paintMaskCells(g,s,null);}return c;}
 function paintMaskCells(g,s,points){g.globalCompositeOperation=s.erase?'destination-out':'source-over';g.fillStyle=MASK_TINT;if(s.fill){const r=s.rect||{x:0,y:0,w:S.w,h:S.h},x=Math.floor(r.x/8)*8,y=Math.floor(r.y/8)*8;g.fillRect(x,y,Math.ceil((r.x+r.w)/8)*8-x,Math.ceil((r.y+r.h)/8)*8-y);}else for(const q of SDStudioCore.strokeChunks(points,s.size,s.shape,S.w,S.h))g.fillRect(q.chunkX*8,q.chunkY*8,8,8);g.globalCompositeOperation='source-over';}
 function cachedMask(){
  const m=main(),geo=S.w+'x'+S.h+'|'+imgId(S.maskBase)+'|'+(m?[m.x,m.y,m.w,m.h].join(','):'-');
@@ -45,7 +50,7 @@ function cachedMask(){
  if(same&&len===VIEW.maskLen&&last===VIEW.maskLast&&n===VIEW.maskLastN)return VIEW.mask;
  if(same&&len===VIEW.maskLen&&last===VIEW.maskLast&&last.space==='canvas'&&!last.fill&&n>VIEW.maskLastN){paintMaskCells(VIEW.mask.getContext('2d'),last,last.points.slice(Math.max(0,VIEW.maskLastN-1)));return remember();}
  if(same&&len===VIEW.maskLen+1&&S.strokes[len-2]===VIEW.maskLast&&last.space==='canvas'){paintMaskCells(VIEW.mask.getContext('2d'),last,last.points||[]);return remember();}
- const c=maskCanvas(),g=c.getContext('2d');g.globalCompositeOperation='source-in';g.fillStyle=MASK_TINT;g.fillRect(0,0,S.w,S.h);g.globalCompositeOperation='source-over';VIEW.mask=c;return remember();
+ VIEW.mask=rebuildMaskOverlay();return remember();
 }
 function scheduleDraw(){if(VIEW.raf)return;VIEW.raf=requestAnimationFrame(()=>{VIEW.raf=0;draw();});}
 // Small previews for lists instead of multi-MB data URLs.
@@ -77,7 +82,9 @@ function endDrag(){drag=null;}
 cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);cv.addEventListener('lostpointercapture',endDrag);cv.addEventListener('pointerleave',()=>{cursor=null;draw();});
 $('stage').addEventListener('wheel',e=>{if(e.ctrlKey){e.preventDefault();zoom(S.zoom*(e.deltaY<0?1.1:.9));}},{passive:false});
 function undo(){if(S.strokes.length)S.redo.push(S.strokes.pop());draw();}function redo(){if(S.redo.length)S.strokes.push(S.redo.pop());draw();}
-window.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)||document.querySelector('dialog[open]'))return;if(e.code==='Space'){space=true;e.preventDefault();}if(e.ctrlKey&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo();return;}if(e.key.toLowerCase()==='v')setTool('move');if(e.key.toLowerCase()==='b')setTool('brush');if(e.key.toLowerCase()==='e')setTool('erase');if(e.key==='['||e.key===']'){$('brushSize').value=Math.min(200,Math.max(2,+$('brushSize').value+(e.key===']'?5:-5)));$('brushSize').dispatchEvent(new Event('input'));}});window.addEventListener('keyup',e=>{if(e.code==='Space')space=false;});window.addEventListener('blur',()=>{space=false;drag=null;});
+const TEXT_INPUTS=['text','number','search','password','email','url','tel'];
+function typingInto(el){return !!el&&(el.tagName==='TEXTAREA'||el.isContentEditable||(el.tagName==='INPUT'&&TEXT_INPUTS.includes(el.type)));}
+window.addEventListener('keydown',e=>{const a=document.activeElement;if(typingInto(a)||document.querySelector('dialog[open]'))return;const k=e.key.toLowerCase(),handled=['v','b','e','[',']'].includes(k)&&!e.ctrlKey&&!e.altKey&&!e.metaKey;if((handled||e.code==='Space'||(e.ctrlKey&&k==='z'))&&a&&a!==document.body&&a.blur)a.blur();if(handled)e.preventDefault();if(e.code==='Space'){space=true;e.preventDefault();}if(e.ctrlKey&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo();return;}if(e.key.toLowerCase()==='v')setTool('move');if(e.key.toLowerCase()==='b')setTool('brush');if(e.key.toLowerCase()==='e')setTool('erase');if(e.key==='['||e.key===']'){$('brushSize').value=Math.min(200,Math.max(2,+$('brushSize').value+(e.key===']'?5:-5)));$('brushSize').dispatchEvent(new Event('input'));}});window.addEventListener('keyup',e=>{if(e.code==='Space')space=false;});window.addEventListener('blur',()=>{space=false;drag=null;});
 // Default save names follow the main image's file name (without extension).
 function stem(n){return String(n||'').replace(/\.[^.\\/]+$/,'').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_').trim().replace(/[. ]+$/,'').slice(0,80);}
 function baseName(){return main()?.baseName||'refit';}
@@ -121,7 +128,7 @@ async function generate(){
    started=Date.now();
    const sc=structuredClone(scene);if(baseSeed>=0)sc.params.seed=String((baseSeed+index)%4294967296);
    const d=await SDStudioCore.generate(sc);sc.params.seed=d.seed;
-   const diagnostics={app:'Refit Canvas 1.6.2',upstream:SDStudioCore.info.commit,pipeline:'upstream-NovelAiImageGenService',settings:d.settings,request:d.request,canvas:sc.snapshot,referenceTagAdded:sc.referenceTagAdded,maskPixels:sc.maskPixels,maskGrid:8,localOriginalComposite:false};
+   const diagnostics={app:'Refit Canvas 1.6.3',upstream:SDStudioCore.info.commit,pipeline:'upstream-NovelAiImageGenService',settings:d.settings,request:d.request,canvas:sc.snapshot,referenceTagAdded:sc.referenceTagAdded,maskPixels:sc.maskPixels,maskGrid:8,localOriginalComposite:false};
    const r=await addResult(d.image,sc.snapshot,d.seed,count>1?`NAI ${index+1}/${count}`:'NAI',diagnostics,sc);made.push(r);
    if(p.autoCrop)download(r.crop,`${r.baseName}-${d.seed}.png`);
   }

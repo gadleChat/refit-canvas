@@ -1,7 +1,7 @@
 {
   "name": "refit-canvas",
   "productName": "Refit Canvas",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "Refit Canvas — NovelAI reference inpainting desktop editor built on SDStudio code",
   "main": "main.cjs",
   "private": true,

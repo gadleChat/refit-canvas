@@ -89,7 +89,7 @@ function stopBackend(){
 }
 function createWindow(){
  const display=require('electron').screen.getPrimaryDisplay().workAreaSize;
- mainWindow=new BrowserWindow({title:'Refit Canvas 1.6.1',width:Math.min(1600,display.width),height:Math.min(1000,display.height),minWidth:1080,minHeight:680,show:false,backgroundColor:'#f7f6fb',icon:path.join(__dirname,'icon.png'),autoHideMenuBar:true,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,allowRunningInsecureContent:false,spellcheck:false,preload:path.join(__dirname,'preload.cjs')}});
+ mainWindow=new BrowserWindow({title:'Refit Canvas 1.6.2',width:Math.min(1600,display.width),height:Math.min(1000,display.height),minWidth:1080,minHeight:680,show:false,backgroundColor:'#f7f6fb',icon:path.join(__dirname,'icon.png'),autoHideMenuBar:true,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,allowRunningInsecureContent:false,spellcheck:false,preload:path.join(__dirname,'preload.cjs')}});
  mainWindow.setMenuBarVisibility(false);
  mainWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  mainWindow.webContents.on('will-navigate',(event,url)=>{if(url!==origin&&url!==origin+'/')event.preventDefault();});
@@ -108,7 +108,7 @@ function createWindow(){
   {label:'파일',submenu:[{label:'프로젝트 저장',accelerator:'CmdOrCtrl+S',click:()=>mainWindow?.webContents.executeJavaScript("document.getElementById('saveProject').click()")},{type:'separator'},{role:'quit',label:'종료'}]},
   {label:'편집',submenu:[{role:'undo',label:'실행 취소'},{role:'redo',label:'다시 실행'},{type:'separator'},{role:'cut',label:'잘라내기'},{role:'copy',label:'복사'},{role:'paste',label:'붙여넣기'},{role:'selectAll',label:'전체 선택'}]},
   {label:'보기',submenu:[{role:'togglefullscreen',label:'전체 화면'},{label:'개발자 도구',accelerator:'CmdOrCtrl+Shift+I',click:()=>mainWindow?.webContents.toggleDevTools()}]},
-  {label:'도움말',submenu:[{label:'앱 정보',click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:'Refit Canvas',message:'Refit Canvas 1.6.1',detail:'SDStudio 코드를 사용하는 비공식 독립 앱\n8픽셀 마스크 격자 정렬 · 메인/참조 배치 · 인페인트 · 메인 crop · 업스케일'})}]}
+  {label:'도움말',submenu:[{label:'앱 정보',click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:'Refit Canvas',message:'Refit Canvas 1.6.2',detail:'SDStudio 코드를 사용하는 비공식 독립 앱\n8픽셀 마스크 격자 정렬 · 메인/참조 배치 · 인페인트 · 메인 crop · 업스케일'})}]}
  ]));
 }
 if(process.platform==='win32'&&!app.requestSingleInstanceLock())app.quit();
